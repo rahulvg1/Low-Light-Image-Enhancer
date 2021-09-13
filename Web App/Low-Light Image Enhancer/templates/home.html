@@ -1,0 +1,67 @@
+{% extends "base.html" %} 
+
+{% block content %}
+
+<body>    
+
+	<div class="file-upload">
+  	<button class="file-upload-btn" type="button" onclick="$('.file-upload-input').trigger( 'click' )">Add Image</button>
+
+
+	<div class="image-upload-wrap">
+    <input id="image-selector" class="file-upload-input" type='file' accept="image/png" />
+
+    <div class="drag-text">
+      <h3>Drag and drop a file or select add Image</h3>
+    </div>
+    </div>
+
+    <div class="file-upload-content">
+    <img id="selected-image" src="" width="" height="" />
+    <img id="imageBox" src="">
+	</div>
+    
+    <button class ="file-upload-btn" id="predict-button">Enhance</button>
+ 	<!--
+ 	<div>
+    <input class="reset-btn" type="reset" value="Reset" onClick="window.location.reload()">
+ 	</div>
+ -->
+
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <script>
+        let base64Image;
+        $("#image-selector").change(function() {
+        	$('.image-upload-wrap').hide();
+            let reader = new FileReader();
+            reader.onload = function(e) {
+                let dataURL = reader.result;
+                $('#selected-image').attr({"src": dataURL, "width":256 , "height":256 });
+                $('.file-upload-content').show();
+                base64Image = dataURL.replace("data:image/png;base64,","");
+                console.log(base64Image);
+            }
+            reader.readAsDataURL($("#image-selector")[0].files[0]);
+        });
+        
+        $("#predict-button").click(function(){
+            let message = {
+                image: base64Image
+            }
+            console.log(message);
+            $.post("http://127.0.0.1:5000/predict", JSON.stringify(message), function(response){
+            	if (response.predicted) {
+            		 d = new Date();
+    	        	var p = "static/output/out.png?" + d.getTime()
+        	    	$("#imageBox").attr("src",p);
+            	} 
+
+            });
+           
+        });       
+    </script>
+
+	
+
+
+{% endblock %}
